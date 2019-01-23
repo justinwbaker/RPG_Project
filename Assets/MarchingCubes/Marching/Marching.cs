@@ -67,10 +67,53 @@ namespace MarchingCubesProject
 
         }
 
-         /// <summary>
+        public virtual void GenerateWithUVs(IList<float> voxels, int width, int height, int depth, IList<Vector3> verts, IList<int> indices, IList<Vector3> UVs)
+        {
+
+            if (Surface > 0.0f)
+            {
+                WindingOrder[0] = 0;
+                WindingOrder[1] = 1;
+                WindingOrder[2] = 2;
+            }
+            else
+            {
+                WindingOrder[0] = 2;
+                WindingOrder[1] = 1;
+                WindingOrder[2] = 0;
+            }
+
+            int x, y, z, i;
+            int ix, iy, iz;
+            for (x = 0; x < width - 1; x++)
+            {
+                for (y = 0; y < height - 1; y++)
+                {
+                    for (z = 0; z < depth - 1; z++)
+                    {
+                        //Get the values in the 8 neighbours which make up a cube
+                        for (i = 0; i < 8; i++)
+                        {
+                            ix = x + VertexOffset[i, 0];
+                            iy = y + VertexOffset[i, 1];
+                            iz = z + VertexOffset[i, 2];
+
+                            Cube[i] = voxels[ix + iy * width + iz * width * height];
+                        }
+
+                        //Perform algorithm
+                        MarchWithUVs(x, y, z, Cube, verts, indices, UVs);
+                    }
+                }
+            }
+
+        }
+
+        /// <summary>
         /// MarchCube performs the Marching algorithm on a single cube
         /// </summary>
         protected abstract void March(float x, float y, float z, float[] cube, IList<Vector3> vertList, IList<int> indexList);
+        protected abstract void MarchWithUVs(float x, float y, float z, float[] cube, IList<Vector3> vertList, IList<int> indexList, IList<Vector3> UVs);
 
         /// <summary>
         /// GetOffset finds the approximate point of intersection of the surface

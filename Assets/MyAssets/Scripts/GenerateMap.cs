@@ -14,6 +14,8 @@ public class GenerateMap : MonoBehaviour {
 
     public static float seed = 29384756;
 
+    GameObject meshObject;
+
     GenerateMesh meshGenerator;
     // Use this for initialization
     void Start () {
@@ -48,19 +50,39 @@ public class GenerateMap : MonoBehaviour {
 
     public IEnumerator GenerateTerrain()
     {
-        Generate();
+
+        if (meshObject == null)
+        {
+            Generate();
+            meshObject = new GameObject("Mesh");
+            meshObject.transform.parent = transform;
+            meshObject.transform.localPosition = new Vector3(0, 0, 0);
+            meshObject.AddComponent<MeshFilter>();
+            meshObject.AddComponent<MeshRenderer>();
+            meshObject.GetComponent<Renderer>().material = mat;
+        }
 
         meshGenerator = new GenerateMesh(width, height, length, voxels);
         meshGenerator.Generate();
 
-        GameObject go = new GameObject("Mesh");
-        go.transform.parent = transform;
-        go.AddComponent<MeshFilter>();
-        go.AddComponent<MeshRenderer>();
-        go.GetComponent<Renderer>().material = mat;
-        go.GetComponent<MeshFilter>().mesh = meshGenerator.mesh;
-        go.transform.localPosition = new Vector3(0, 0, 0);
-        go.AddComponent<MeshCollider>();
+        meshObject.GetComponent<MeshFilter>().mesh = meshGenerator.mesh;
+        Destroy(meshObject.GetComponent<MeshCollider>());
+        meshObject.AddComponent<MeshCollider>();
+
         yield return null;
+    }
+
+    public void removeVoxel(int x, int y, int z)
+    {
+        int idx = x + y * width + z * width * height;
+        voxels[idx] = 0f;
+        StartCoroutine("GenerateTerrain");
+    }
+
+    public void addVoxel(int x, int y, int z)
+    {
+        int idx = x + y * width + z * width * height;
+        voxels[idx] = 1f;
+        StartCoroutine("GenerateTerrain");
     }
 }

@@ -64,6 +64,55 @@ namespace MarchingCubesProject
             }
         }
 
+        protected override void MarchWithUVs(float x, float y, float z, float[] cube, IList<Vector3> vertList, IList<int> indexList, IList<Vector3> UVs)
+        {
+            int i, j, vert, idx;
+            int flagIndex = 0;
+            float offset = 0.0f;
+
+            //Find which vertices are inside of the surface and which are outside
+            for (i = 0; i < 8; i++) if (cube[i] <= Surface) flagIndex |= 1 << i;
+
+            //Find which edges are intersected by the surface
+            int edgeFlags = CubeEdgeFlags[flagIndex];
+
+            //If the cube is entirely inside or outside of the surface, then there will be no intersections
+            if (edgeFlags == 0) return;
+
+            //Find the point of intersection of the surface with each edge
+            for (i = 0; i < 12; i++)
+            {
+                //if there is an intersection on this edge
+                if ((edgeFlags & (1 << i)) != 0)
+                {
+                    offset = GetOffset(cube[EdgeConnection[i, 0]], cube[EdgeConnection[i, 1]]);
+
+                    EdgeVertex[i].x = x + (VertexOffset[EdgeConnection[i, 0], 0] + offset * EdgeDirection[i, 0]);
+                    EdgeVertex[i].y = y + (VertexOffset[EdgeConnection[i, 0], 1] + offset * EdgeDirection[i, 1]);
+                    EdgeVertex[i].z = z + (VertexOffset[EdgeConnection[i, 0], 2] + offset * EdgeDirection[i, 2]);
+
+                    UVs.Add(new Vector2(EdgeVertex[i].x, EdgeVertex[i].y));
+                }
+            }
+
+            //Save the triangles that were found. There can be up to five per cube
+            for (i = 0; i < 5; i++)
+            {
+                if (TriangleConnectionTable[flagIndex, 3 * i] < 0) break;
+
+                idx = vertList.Count;
+
+                for (j = 0; j < 3; j++)
+                {
+                    vert = TriangleConnectionTable[flagIndex, 3 * i + j];
+                    indexList.Add(idx + WindingOrder[j]);
+                    vertList.Add(EdgeVertex[vert]);
+
+
+                }
+            }
+        }
+
         /// <summary>
         /// EdgeConnection lists the index of the endpoint vertices for each 
         /// of the 12 edges of the cube.

@@ -54,6 +54,31 @@ namespace MarchingCubesProject
             }
         }
 
+        protected override void MarchWithUVs(float x, float y, float z, float[] cube, IList<Vector3> vertList, IList<int> indexList, IList<Vector3> UVs)
+        {
+            int i, j, vertexInACube;
+
+            //Make a local copy of the cube's corner positions
+            for (i = 0; i < 8; i++)
+            {
+                CubePosition[i].x = x + VertexOffset[i, 0];
+                CubePosition[i].y = y + VertexOffset[i, 1];
+                CubePosition[i].z = z + VertexOffset[i, 2];
+            }
+
+            for (i = 0; i < 6; i++)
+            {
+                for (j = 0; j < 4; j++)
+                {
+                    vertexInACube = TetrahedronsInACube[i, j];
+                    TetrahedronPosition[j] = CubePosition[vertexInACube];
+                    TetrahedronValue[j] = cube[vertexInACube];
+                }
+
+                MarchTetrahedron(vertList, indexList);
+            }
+        }
+
         /// <summary>
         /// MarchTetrahedron performs the Marching Tetrahedrons algorithm on a single tetrahedron
         /// </summary>

@@ -28,6 +28,7 @@ public class GenerateMesh {
     public void Generate()
     {
         List<Vector3> verts = new List<Vector3>();
+        List<Vector3> uvs = new List<Vector3>();
         List<int> indices = new List<int>();
         marching = new MarchingCubes();
 
@@ -36,6 +37,7 @@ public class GenerateMesh {
         mesh = new Mesh();
         mesh.SetVertices(verts);
         mesh.SetTriangles(indices, 0);
+        //mesh.SetUVs(0,uvs);
         mesh.RecalculateBounds();
         mesh.RecalculateNormals();
     }
