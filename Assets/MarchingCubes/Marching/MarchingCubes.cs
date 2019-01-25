@@ -64,14 +64,14 @@ namespace MarchingCubesProject
             }
         }
 
-        protected override void MarchWithUVs(float x, float y, float z, float[] cube, IList<Vector3> vertList, IList<int> indexList, IList<Vector3> UVs)
+        protected override void MarchWithColors(float x, float y, float z, Voxel[] vox, IList<Vector3> vertList, IList<int> indexList, IList<Color> colors)
         {
             int i, j, vert, idx;
             int flagIndex = 0;
             float offset = 0.0f;
 
             //Find which vertices are inside of the surface and which are outside
-            for (i = 0; i < 8; i++) if (cube[i] <= Surface) flagIndex |= 1 << i;
+            for (i = 0; i < 8; i++) if (!vox[i].isColldable) flagIndex |= 1 << i;
 
             //Find which edges are intersected by the surface
             int edgeFlags = CubeEdgeFlags[flagIndex];
@@ -85,13 +85,11 @@ namespace MarchingCubesProject
                 //if there is an intersection on this edge
                 if ((edgeFlags & (1 << i)) != 0)
                 {
-                    offset = GetOffset(cube[EdgeConnection[i, 0]], cube[EdgeConnection[i, 1]]);
+                    offset = GetOffset(vox[EdgeConnection[i, 0]].isColldable?1:0, vox[EdgeConnection[i, 1]].isColldable?1:0);
 
                     EdgeVertex[i].x = x + (VertexOffset[EdgeConnection[i, 0], 0] + offset * EdgeDirection[i, 0]);
                     EdgeVertex[i].y = y + (VertexOffset[EdgeConnection[i, 0], 1] + offset * EdgeDirection[i, 1]);
                     EdgeVertex[i].z = z + (VertexOffset[EdgeConnection[i, 0], 2] + offset * EdgeDirection[i, 2]);
-
-                    UVs.Add(new Vector2(EdgeVertex[i].x, EdgeVertex[i].y));
                 }
             }
 
@@ -105,10 +103,9 @@ namespace MarchingCubesProject
                 for (j = 0; j < 3; j++)
                 {
                     vert = TriangleConnectionTable[flagIndex, 3 * i + j];
+
                     indexList.Add(idx + WindingOrder[j]);
                     vertList.Add(EdgeVertex[vert]);
-
-
                 }
             }
         }
@@ -136,6 +133,15 @@ namespace MarchingCubesProject
 	        {0.0f, 0.0f, 1.0f},{0.0f, 0.0f, 1.0f},{ 0.0f, 0.0f, 1.0f},{0.0f,  0.0f, 1.0f}
 	    };
 
+        ///<summary>
+        ///assign color based on vertex position
+        /// </summary>
+        public static readonly int[,] VertColor = new int[,]
+        {
+            { -1 , -1, -1},
+            { 1 , 1, 1},
+            { 1 , 1, 1},
+        };
 
         /// <summary>
         /// For any edge, if one vertex is inside of the surface and the other 

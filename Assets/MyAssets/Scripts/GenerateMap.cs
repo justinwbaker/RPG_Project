@@ -10,9 +10,11 @@ public class GenerateMap : MonoBehaviour {
     public int height = 32;
     public int length = 32;
 
-    public float[] voxels;
+    public List<Voxel> types;
 
-    public static float seed = 29384756;
+    private Voxel[] voxels;
+
+    public static float seed = 255;
 
     GameObject meshObject;
 
@@ -20,7 +22,7 @@ public class GenerateMap : MonoBehaviour {
     // Use this for initialization
     void Start () {
 
-        voxels = new float[width * height * length];
+        voxels = new Voxel[width * height * length];
 
         StartCoroutine("GenerateTerrain");
     }
@@ -38,11 +40,19 @@ public class GenerateMap : MonoBehaviour {
             {
                 float xCoord = ((float)x + transform.position.x + (float)seed) / 100f;
                 float yCoord = ((float)z + transform.position.z + (float)seed) / 100f;
-                float sample = Mathf.PerlinNoise(xCoord, yCoord) * height;
-                for (int y = 0; y < sample; y++)
+                int sample = (int)Mathf.Floor(Mathf.PerlinNoise(xCoord, yCoord) * height);
+                for (int y = 0; y < height; y++)
                 {
                     int idx = x + y * width + z * width * height;
-                    voxels[idx] = 1f;
+                    voxels[idx] = types[0];
+                    if (y == sample)
+                    {
+                        voxels[idx] = types[1];
+                    }
+                    else if(y < sample)
+                    {
+                        voxels[idx] = types[2];
+                    }
                 }
             }
         }
@@ -75,14 +85,14 @@ public class GenerateMap : MonoBehaviour {
     public void removeVoxel(int x, int y, int z)
     {
         int idx = x + y * width + z * width * height;
-        voxels[idx] = 0f;
+        voxels[idx] = types[0];
         StartCoroutine("GenerateTerrain");
     }
 
     public void addVoxel(int x, int y, int z)
     {
         int idx = x + y * width + z * width * height;
-        voxels[idx] = 1f;
+        voxels[idx] = types[2];
         StartCoroutine("GenerateTerrain");
     }
 }

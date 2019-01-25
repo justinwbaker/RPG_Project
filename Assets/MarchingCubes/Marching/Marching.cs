@@ -12,6 +12,7 @@ namespace MarchingCubesProject
         public float Surface { get; set; }
 
         private float[] Cube { get; set; }
+        private Voxel[] Vox { get; set; }
 
         /// <summary>
         /// Winding order of triangles use 2,1,0 or 0,1,2
@@ -22,12 +23,12 @@ namespace MarchingCubesProject
         {
             Surface = surface;
             Cube = new float[8];
+            Vox = new Voxel[8];
             WindingOrder = new int[] { 0, 1, 2 };
         }
 
-        public virtual void Generate(IList<float> voxels, int width, int height, int depth, IList<Vector3> verts, IList<int> indices)
+        public virtual void Generate(IList<Voxel> voxels, int width, int height, int depth, IList<Vector3> verts, IList<int> indices)
         {
-
             if (Surface > 0.0f)
             {
                 WindingOrder[0] = 0;
@@ -56,7 +57,7 @@ namespace MarchingCubesProject
                             iy = y + VertexOffset[i, 1];
                             iz = z + VertexOffset[i, 2];
 
-                            Cube[i] = voxels[ix + iy * width + iz * width * height];
+                            Cube[i] = voxels[ix + iy * width + iz * width * height].isColldable?1:0;
                         }
 
                         //Perform algorithm
@@ -67,7 +68,7 @@ namespace MarchingCubesProject
 
         }
 
-        public virtual void GenerateWithUVs(IList<float> voxels, int width, int height, int depth, IList<Vector3> verts, IList<int> indices, IList<Vector3> UVs)
+        public virtual void GenerateWithColors(IList<Voxel> voxels, int width, int height, int depth, IList<Vector3> verts, IList<int> indices, IList<Color> colors)
         {
 
             if (Surface > 0.0f)
@@ -97,12 +98,10 @@ namespace MarchingCubesProject
                             ix = x + VertexOffset[i, 0];
                             iy = y + VertexOffset[i, 1];
                             iz = z + VertexOffset[i, 2];
-
-                            Cube[i] = voxels[ix + iy * width + iz * width * height];
+                            Vox[i] = voxels[ix + iy * width + iz * width * height];
                         }
-
                         //Perform algorithm
-                        MarchWithUVs(x, y, z, Cube, verts, indices, UVs);
+                        MarchWithColors(x, y, z, Vox, verts, indices, colors);
                     }
                 }
             }
@@ -113,7 +112,7 @@ namespace MarchingCubesProject
         /// MarchCube performs the Marching algorithm on a single cube
         /// </summary>
         protected abstract void March(float x, float y, float z, float[] cube, IList<Vector3> vertList, IList<int> indexList);
-        protected abstract void MarchWithUVs(float x, float y, float z, float[] cube, IList<Vector3> vertList, IList<int> indexList, IList<Vector3> UVs);
+        protected abstract void MarchWithColors(float x, float y, float z, Voxel[] vox, IList<Vector3> vertList, IList<int> indexList, IList<Color> colors);
 
         /// <summary>
         /// GetOffset finds the approximate point of intersection of the surface

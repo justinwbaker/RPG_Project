@@ -54,7 +54,7 @@ namespace MarchingCubesProject
             }
         }
 
-        protected override void MarchWithUVs(float x, float y, float z, float[] cube, IList<Vector3> vertList, IList<int> indexList, IList<Vector3> UVs)
+        protected override void MarchWithColors(float x, float y, float z, Voxel[] vox, IList<Vector3> vertList, IList<int> indexList, IList<Color> colors)
         {
             int i, j, vertexInACube;
 
@@ -72,7 +72,7 @@ namespace MarchingCubesProject
                 {
                     vertexInACube = TetrahedronsInACube[i, j];
                     TetrahedronPosition[j] = CubePosition[vertexInACube];
-                    TetrahedronValue[j] = cube[vertexInACube];
+                    TetrahedronValue[j] = vox[vertexInACube]?1:0;
                 }
 
                 MarchTetrahedron(vertList, indexList);
