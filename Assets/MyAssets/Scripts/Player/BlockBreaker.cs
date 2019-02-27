@@ -44,10 +44,10 @@ public class BlockBreaker : MonoBehaviour {
                 cube.gameObject.SetActive(false);
             }
         }
-            else
-            {
-                cube.gameObject.SetActive(false);
-            }
+        else
+        {
+            cube.gameObject.SetActive(false);
+        }
     }
 
     public void RemoveCubeUpdate()
